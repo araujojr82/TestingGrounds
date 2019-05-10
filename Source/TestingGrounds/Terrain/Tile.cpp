@@ -3,6 +3,7 @@
 
 #include "Tile.h"
 #include "Engine/World.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 ATile::ATile()
@@ -33,7 +34,9 @@ void ATile::PlaceActors( TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn
 void ATile::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	CastSphere( GetActorLocation(), 300 );
+	CastSphere( GetActorLocation() + FVector(0, 0, 1000 ), 300 );	
 }
 
 // Called every frame
@@ -41,4 +44,24 @@ void ATile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+bool ATile::CastSphere( FVector Location, float Radius )
+{
+	FHitResult HitResult;
+
+	FVector FinalLocation = Location + FVector( 0, 0, 1 );
+
+	bool HasHit = GetWorld()->SweepSingleByChannel(	HitResult,
+													Location,
+													FinalLocation, //Location,
+													FQuat::Identity,
+													ECollisionChannel::ECC_GameTraceChannel2,
+													FCollisionShape::MakeSphere( Radius ) );
+
+	FColor ResultColor = HasHit ? FColor::Red : FColor::Green;
+	//DrawDebugSphere( GetWorld(), Location, Radius, 100, ResultColor, true, 100 );
+	DrawDebugCapsule( GetWorld(), Location, 0, Radius, FQuat::Identity, ResultColor, true, 100 );
+
+	return HasHit;
 }
